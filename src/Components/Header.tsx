@@ -109,7 +109,7 @@ function Header() {
   const [yValue, setYValue] = useState(0);
   const { scrollY } = useViewportScroll();
 
-  console.log(homeMatch, tvMatch);
+  //   console.log(homeMatch, tvMatch);
 
   const searchClick = () => {
     setOpenSearch((prev) => !prev);
@@ -124,7 +124,7 @@ function Header() {
   return (
     <Nav
       animate={{
-        backgroundColor: yValue > 80 ? "rgba(0,0,0,0)" : "rgba(0,0,0,1)",
+        backgroundColor: yValue > 150 ? "rgba(0,0,0,1)" : "rgba(0,0,0,0)",
       }}
     >
       <Col>
