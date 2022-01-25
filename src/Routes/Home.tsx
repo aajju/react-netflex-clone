@@ -1,26 +1,30 @@
 import { useQuery } from "react-query";
 import styled from "styled-components";
-import { getMovies, IGetMoviesResults } from "../api";
+import { getMovies, IGetMoviesResults, IMovie } from "../api";
 import makeImagePath from "../utils";
-import { motion, Variants, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import { type } from "os";
 import Slider from "../Components/Slider";
+// import { useMatch } from "react-router-dom";
+import {
+  AnimatePresence,
+  AnimateSharedLayout,
+  useViewportScroll,
+} from "framer-motion";
+import { useRecoilValue } from "recoil";
+import { movieModalAtom } from "../atom";
+import AllModal from "../Components/Modal";
 
 const Wrapper = styled.div`
   background-color: black;
-  padding-bottom: 300px;
 `;
-const FullBanner = styled.div<{ FullBgImage: string }>`
+const FullBanner = styled.div<{ fullbgimage: string }>`
   width: 100%;
   height: 100vh;
-  /* background-color: red; */
   background-image: linear-gradient(
       to right,
       rgba(0, 0, 0, 0.8) 40%,
       rgba(0, 0, 0, 0.4)
     ),
-    url(${(props) => props.FullBgImage});
+    url(${(props) => props.fullbgimage});
   background-size: cover;
   background-position: center center;
   color: white;
@@ -36,7 +40,7 @@ const Title = styled.h1`
   width: 50%;
 `;
 
-const MainInfo = styled.div`
+export const MainInfo = styled.div`
   display: flex;
   justify-content: space-between;
   width: 50%;
@@ -67,6 +71,8 @@ const Loading = styled.div`
   align-items: center;
 `;
 
+// const Modal = styled(motion.div)``;
+
 // --------------------- function  ----------
 
 function Home() {
@@ -78,67 +84,118 @@ function Home() {
   const resultPopular = useQuery<IGetMoviesResults>(["movies", "popular"], () =>
     getMovies("popular")
   );
+  const resultTopRated = useQuery<IGetMoviesResults>(
+    ["movies", "top_rated"],
+    () => getMovies("top_rated")
+  );
 
-  // const { data, isLoading } = useQuery<IGetMoviesResults>(
-  //     ["movies", "now_playing"],
-  //     getMovies
-  //   );
+  const resultUpcoming = useQuery<IGetMoviesResults>(
+    ["movies", "upcoming"],
+    () => getMovies("upcoming")
+  );
 
-  //   console.log(
-  //     data?.results
-  //       .slice(1)
-  //       .slice(index * sliderCount, index * sliderCount + sliderCount)
-  //   );
+  const isMovieModal = useRecoilValue(movieModalAtom);
+  //   const [yValue, setYValue] = useState(0);
+
+  const { scrollY } = useViewportScroll();
+  let pickModal: any = {};
+
+  const pickModalFunc = (content: IMovie) => {
+    if (content.id === isMovieModal.id) {
+      pickModal = content;
+    }
+    return pickModal;
+  };
+
+  switch (isMovieModal.category) {
+    case "popular":
+      resultPopular.data?.results.map((content) => pickModalFunc(content));
+      break;
+    case "top_rated":
+      resultTopRated.data?.results.map((content) => pickModalFunc(content));
+      break;
+    case "now_playing":
+      resultNowPlaying.data?.results.map((content) => pickModalFunc(content));
+      break;
+    case "upcoming":
+      resultUpcoming.data?.results.map((content) => pickModalFunc(content));
+      break;
+  }
 
   return (
-    <Wrapper>
-      {resultNowPlaying.isLoading ? (
-        <Loading>Loading...</Loading>
-      ) : (
-        <>
-          <FullBanner
-            FullBgImage={makeImagePath(
-              resultNowPlaying.data?.results[0].backdrop_path || ""
-            )}
-          >
-            <Title>
-              {resultNowPlaying.data
-                ? resultNowPlaying.data.results[0].title
-                : ""}
-            </Title>
+    <>
+      <Wrapper>
+        {resultNowPlaying.isLoading ? (
+          <Loading>Loading...</Loading>
+        ) : (
+          <>
+            <FullBanner
+              fullbgimage={makeImagePath(
+                resultNowPlaying.data?.results[0].backdrop_path || ""
+              )}
+            >
+              <Title>
+                {resultNowPlaying.data
+                  ? resultNowPlaying.data.results[0].title
+                  : ""}
+              </Title>
+              {resultNowPlaying.data ? (
+                <MainInfo>
+                  <h4>
+                    {"개봉일 : " +
+                      resultNowPlaying.data.results[0].release_date}
+                  </h4>
+                  <h1>
+                    {"평점 : " + resultNowPlaying.data.results[0].vote_average}
+                  </h1>
+                </MainInfo>
+              ) : null}
+              <Overview>
+                {resultNowPlaying.data
+                  ? resultNowPlaying.data.results[0].overview
+                  : ""}
+              </Overview>
+            </FullBanner>
             {resultNowPlaying.data ? (
-              <MainInfo>
-                <h4>
-                  {"개봉일 : " + resultNowPlaying.data.results[0].release_date}
-                </h4>
-                <h1>
-                  {"평점 : " + resultNowPlaying.data.results[0].vote_average}
-                </h1>
-              </MainInfo>
+              <Slider
+                key="now_playing"
+                data={resultNowPlaying.data}
+                category={"now_playing"}
+              />
             ) : null}
-            <Overview>
-              {resultNowPlaying.data
-                ? resultNowPlaying.data.results[0].overview
-                : ""}
-            </Overview>
-          </FullBanner>
-          {resultNowPlaying.data ? (
-            <Slider
-              key="now_playing"
-              data={resultNowPlaying.data}
-              category={"now_playing"}
-            />
-          ) : null}{" "}
-          {resultPopular.data ? (
-            <Slider
-              key="popular"
-              data={resultPopular.data}
-              category={"popular"}
-            />
-          ) : null}
-        </>
-      )}
-    </Wrapper>
+            {resultPopular.data ? (
+              <Slider
+                key="popular"
+                data={resultPopular.data}
+                category={"popular"}
+              />
+            ) : null}
+
+            {resultTopRated.data ? (
+              <Slider
+                key="top_rated"
+                data={resultTopRated.data}
+                category={"top_rated"}
+              />
+            ) : null}
+
+            {resultUpcoming.data ? (
+              <Slider
+                key="upcoming"
+                data={resultUpcoming.data}
+                category={"upcoming"}
+              />
+            ) : null}
+          </>
+        )}
+      </Wrapper>
+
+      <AnimatePresence>
+        {isMovieModal.id !== 0 ? (
+          <AllModal pickModal={pickModal} scrollY={scrollY.get()} />
+        ) : null}
+      </AnimatePresence>
+    </>
   );
 }
 

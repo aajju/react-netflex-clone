@@ -13,6 +13,7 @@ const Nav = styled(motion.nav)`
   font-size: 14px;
   padding: 20px 60px;
   color: white;
+  z-index: 8;
 `;
 
 const Col = styled.div`
@@ -68,7 +69,7 @@ const Search = styled.span`
   color: white;
   svg {
     height: 25px;
-    z-index: 2;
+    z-index: 9;
     path {
       stroke-width: 0.4px;
       stroke: black;

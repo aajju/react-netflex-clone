@@ -1,13 +1,21 @@
-import { motion, Variants, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  Variants,
+  AnimatePresence,
+  AnimateSharedLayout,
+} from "framer-motion";
 import { useState } from "react";
+// import { useMatch, useNavigate } from "react-router-dom";
+import { useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { IGetMoviesResults } from "../api";
+import { movieModalAtom, tvModalAtom } from "../atom";
 import makeImagePath from "../utils";
 
 const SliderA = styled(motion.div)`
   position: relative;
   top: -100px;
-  height: 400px;
+  height: 300px;
 `;
 
 const Row = styled(motion.div)`
@@ -121,7 +129,7 @@ const BtnRight = styled(motion.div)`
   color: black;
   font-size: 40px;
   font-weight: 800;
-  z-index: 999;
+  z-index: 1;
   text-align: center;
   cursor: pointer;
 `;
@@ -139,7 +147,7 @@ const BtnLeft = styled(motion.div)`
   color: black;
   font-size: 40px;
   font-weight: 800;
-  z-index: 999;
+  z-index: 1;
   text-align: center;
   cursor: pointer;
 `;
@@ -156,15 +164,8 @@ function Slider({ data, category }: SliderProps) {
   const toggleLeaving = () => {
     setLeaving((prev) => !prev);
   };
+  //   const navigate = useNavigate();
 
-  //   const nextClick = () => {
-  //     setBack(false);
-  //     setVisible((prev) => (prev !== 10 ? prev + 1 : prev));
-  //   };
-  //   const prevClick = () => {
-  //     setBack(true);
-  //     setVisible((prev) => (prev !== 1 ? prev - 1 : prev));
-  //   };
   const nextClick = () => {
     setBack(false);
 
@@ -187,13 +188,27 @@ function Slider({ data, category }: SliderProps) {
       //   console.log(maxIndex, index);
     }
   };
+
+  const setMovieModalAtom = useSetRecoilState(movieModalAtom);
+  const setTvModalAtom = useSetRecoilState(tvModalAtom);
+
+  const boxClick = (contentId: number, type: string) => {
+    // console.log(movieId, type);
+    // navigate(`/${type}/${movieId}`);
+    if (data) {
+      data.results[0].title
+        ? setMovieModalAtom({ isClicked: true, id: contentId, category: type })
+        : setTvModalAtom({ isClicked: true, id: contentId, category: type });
+    }
+  };
+
+  //   console.log(contentModal);
   return (
     <>
       <SliderA key={category}>
         <CategoryText>{category.replace("_", " ")}</CategoryText>
         <BtnRight onClick={nextClick}>&#62;</BtnRight>
         <BtnLeft onClick={prevClick}>&#60;</BtnLeft>
-
         <AnimatePresence
           custom={back}
           initial={false}
@@ -219,10 +234,21 @@ function Slider({ data, category }: SliderProps) {
                       whileHover="hover"
                       key={movie.id}
                       boxbgimage={makeImagePath(movie.poster_path, "w500")}
+                      onClick={() => {
+                        movie.title !== undefined
+                          ? boxClick(movie.id, category)
+                          : boxClick(movie.id, category);
+                      }}
                     >
-                      <BoxTitle>{movie.title}</BoxTitle>
+                      <BoxTitle>
+                        {movie.title !== undefined ? movie.title : movie.name}
+                      </BoxTitle>
                       <BoxInfo variants={boxInfoVariants}>
-                        <h4>{"개봉일 : " + movie.release_date}</h4>
+                        <h4>
+                          {movie.title !== undefined
+                            ? "개봉일 : " + movie.release_date
+                            : "첫 공개일 : " + movie.first_air_date}
+                        </h4>
                         <h1>{"평점 : " + movie.vote_average}</h1>
                       </BoxInfo>
                     </Box>
