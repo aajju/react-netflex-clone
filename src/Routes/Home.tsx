@@ -5,6 +5,7 @@ import makeImagePath from "../utils";
 import Slider from "../Components/Slider";
 // import { useMatch } from "react-router-dom";
 import {
+  motion,
   AnimatePresence,
   AnimateSharedLayout,
   useViewportScroll,
@@ -13,10 +14,10 @@ import { useRecoilValue } from "recoil";
 import { movieModalAtom } from "../atom";
 import AllModal from "../Components/Modal";
 
-const Wrapper = styled.div`
+const Wrapper = styled(motion.div)`
   background-color: black;
 `;
-const FullBanner = styled.div<{ fullbgimage: string }>`
+const FullBanner = styled(motion.div)<{ fullbgimage: string }>`
   width: 100%;
   height: 100vh;
   background-image: linear-gradient(
@@ -34,13 +35,13 @@ const FullBanner = styled.div<{ fullbgimage: string }>`
   padding-left: 60px;
 `;
 
-const Title = styled.h1`
+const Title = styled(motion.h1)`
   font-size: 68px;
   font-weight: 700;
   width: 50%;
 `;
 
-export const MainInfo = styled.div`
+export const MainInfo = styled(motion.div)`
   display: flex;
   justify-content: space-between;
   width: 50%;
@@ -58,12 +59,12 @@ export const MainInfo = styled.div`
   }
 `;
 
-const Overview = styled.p`
+const Overview = styled(motion.p)`
   font-size: 20px;
   width: 50%;
 `;
 
-const Loading = styled.div`
+const Loading = styled(motion.div)`
   height: 50vh;
   font-size: 40px;
   display: flex;

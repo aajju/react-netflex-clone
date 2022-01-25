@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { useSetRecoilState } from "recoil";
+import { useQuery } from "react-query";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import styled from "styled-components";
-import { IMovie } from "../api";
+import { getMovieDetail, IGetMoviesResults, IMovie } from "../api";
 import { movieModalAtom, tvModalAtom } from "../atom";
 import makeImagePath from "../utils";
 
@@ -59,9 +60,10 @@ const ModalTitle = styled(motion.h1)`
 const Info = styled(motion.div)`
   width: 100%;
   position: relative;
-  top: -34px;
+  top: -45px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 10px;
   margin-bottom: 10px;
   h1 {
@@ -73,15 +75,28 @@ const Info = styled(motion.div)`
   h4 {
     align-self: flex-start;
     font-size: 16px;
+    margin-top: 5px;
   }
+`;
+
+const Tagline = styled(motion.span)`
+  text-align: center;
+  font-size: 20px;
+  position: relative;
+  top: -40px;
+  font-weight: 600;
+  text-decoration-line: underline;
+  color: yellow;
 `;
 
 const Overview = styled(motion.p)`
   position: relative;
-  top: -35px;
+  top: -25px;
   padding: 0px 15px;
   line-height: 1.8;
 `;
+
+const Detail = styled(motion.div)``;
 
 interface IModalProps {
   pickModal: IMovie;
@@ -91,8 +106,12 @@ interface IModalProps {
 ///////   ------  function ---------- ///////
 
 function AllModal({ pickModal, scrollY }: IModalProps) {
-  const setMovieModal = useSetRecoilState(movieModalAtom);
-  const setTvModal = useSetRecoilState(tvModalAtom);
+  const [movieModal, setMovieModal] = useRecoilState(movieModalAtom);
+  const [tvModal, setTvModal] = useRecoilState(tvModalAtom);
+
+  const movieDetail = useQuery<IMovie>(["movie", "detail"], () =>
+    getMovieDetail(pickModal.id)
+  );
 
   const onClickModalOutside = () => {
     pickModal.title
@@ -103,7 +122,14 @@ function AllModal({ pickModal, scrollY }: IModalProps) {
   return (
     <ModalFather>
       <ModalOutside onClick={onClickModalOutside}></ModalOutside>
-      <ModalInside style={{ top: scrollY + 100 }}>
+      <ModalInside
+        layoutId={
+          pickModal.title
+            ? `${pickModal.id}_${movieModal.category}`
+            : `${pickModal.id}_${tvModal.category}`
+        }
+        style={{ top: scrollY + 100 }}
+      >
         <BgPoster
           fullbgimage={makeImagePath(pickModal.backdrop_path || "w500")}
         />
@@ -111,18 +137,23 @@ function AllModal({ pickModal, scrollY }: IModalProps) {
           {pickModal.title ? pickModal.title : pickModal.name}
         </ModalTitle>
         <Info>
-          <h4>
-            {pickModal.release_date
-              ? "개봉일 : " + pickModal.release_date
-              : "첫 공개일 : " + pickModal.first_air_date}
-          </h4>
+          <div>
+            <h4>
+              {pickModal.release_date
+                ? "개봉일 : " + pickModal.release_date
+                : "첫 공개일 : " + pickModal.first_air_date}
+            </h4>
+            <h4>{"러닝타임 : " + movieDetail.data?.runtime}</h4>
+          </div>
           <h1>{"평점 : " + pickModal.vote_average}</h1>
         </Info>
+        <Tagline>{movieDetail.data?.tagline}</Tagline>
         <Overview>
           {pickModal.overview
             ? `줄거리 ; ${pickModal.overview}`
             : "줄거리 없음"}
         </Overview>
+        <Detail>{movieDetail.data?.runtime}</Detail>
       </ModalInside>
     </ModalFather>
   );

@@ -20,6 +20,7 @@ const SliderA = styled(motion.div)`
 
 const Row = styled(motion.div)`
   display: grid;
+  /* grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); */
   grid-template-columns: repeat(6, 1fr);
   /* background-color: red; */
   width: 100%;
@@ -32,6 +33,7 @@ const Row = styled(motion.div)`
 const Box = styled(motion.div)<{ boxbgimage: string }>`
   height: 200px;
   width: 100%;
+  min-width: 120px;
   background-color: white;
   color: white;
   background-image: url(${(props) => props.boxbgimage});
@@ -202,7 +204,6 @@ function Slider({ data, category }: SliderProps) {
     }
   };
 
-  //   console.log(contentModal);
   return (
     <>
       <SliderA key={category}>
@@ -230,6 +231,7 @@ function Slider({ data, category }: SliderProps) {
                 return (
                   <>
                     <Box
+                      layoutId={`${movie.id}_${category}`}
                       variants={boxVariants}
                       whileHover="hover"
                       key={movie.id}
