@@ -23,3 +23,12 @@ export const tvModalAtom = atom<IModalAtom>({
     category: undefined,
   },
 });
+
+export const searchModalAtom = atom<IModalAtom>({
+  key: "searchModal",
+  default: {
+    isClicked: false,
+    id: 0,
+    category: undefined,
+  },
+});

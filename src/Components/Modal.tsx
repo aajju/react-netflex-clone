@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import { useQuery } from "react-query";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilState } from "recoil";
 import styled from "styled-components";
-import { getMovieDetail, IGetMoviesResults, IMovie } from "../api";
-import { movieModalAtom, tvModalAtom } from "../atom";
+import { getMovieDetail, IMovie } from "../api";
+import { movieModalAtom, searchModalAtom, tvModalAtom } from "../atom";
 import makeImagePath from "../utils";
 
 const ModalFather = styled(motion.div)``;
@@ -108,53 +108,92 @@ interface IModalProps {
 function AllModal({ pickModal, scrollY }: IModalProps) {
   const [movieModal, setMovieModal] = useRecoilState(movieModalAtom);
   const [tvModal, setTvModal] = useRecoilState(tvModalAtom);
+  const [searchModal, setSearchModal] = useRecoilState(searchModalAtom);
 
   const movieDetail = useQuery<IMovie>(["movie", "detail"], () =>
     getMovieDetail(pickModal.id)
   );
 
   const onClickModalOutside = () => {
-    pickModal.title
-      ? setMovieModal({ isClicked: false, id: 0, category: undefined })
-      : setTvModal({ isClicked: false, id: 0, category: undefined });
+    setMovieModal({ isClicked: false, id: 0, category: undefined });
+    setTvModal({ isClicked: false, id: 0, category: undefined });
+    setSearchModal({ isClicked: false, id: 0, category: undefined });
+  };
+
+  const timeConvert = (n: number | undefined) => {
+    if (n) {
+      const num = n;
+      const hours = num / 60;
+      const rhours = Math.floor(hours);
+      const minutes = (hours - rhours) * 60;
+      const rminutes = Math.round(minutes);
+      return rhours + " hour " + rminutes + " minute";
+    }
   };
 
   return (
     <ModalFather>
       <ModalOutside onClick={onClickModalOutside}></ModalOutside>
-      <ModalInside
-        layoutId={
-          pickModal.title
-            ? `${pickModal.id}_${movieModal.category}`
-            : `${pickModal.id}_${tvModal.category}`
-        }
-        style={{ top: scrollY + 100 }}
-      >
-        <BgPoster
-          fullbgimage={makeImagePath(pickModal.backdrop_path || "w500")}
-        />
-        <ModalTitle>
-          {pickModal.title ? pickModal.title : pickModal.name}
-        </ModalTitle>
-        <Info>
-          <div>
-            <h4>
-              {pickModal.release_date
-                ? "개봉일 : " + pickModal.release_date
-                : "첫 공개일 : " + pickModal.first_air_date}
-            </h4>
-            <h4>{"러닝타임 : " + movieDetail.data?.runtime}</h4>
-          </div>
-          <h1>{"평점 : " + pickModal.vote_average}</h1>
-        </Info>
-        <Tagline>{movieDetail.data?.tagline}</Tagline>
-        <Overview>
-          {pickModal.overview
-            ? `줄거리 ; ${pickModal.overview}`
-            : "줄거리 없음"}
-        </Overview>
-        <Detail>{movieDetail.data?.runtime}</Detail>
-      </ModalInside>
+
+      {searchModal.category ? (
+        <ModalInside
+          layoutId={`${pickModal.id}_${searchModal.category}`}
+          style={{ top: scrollY + 100 }}
+        >
+          <BgPoster
+            fullbgimage={makeImagePath(pickModal.backdrop_path || "w500")}
+          />
+          <ModalTitle>
+            {pickModal.title ? pickModal.title : pickModal.name}
+          </ModalTitle>
+          <Info>
+            <div>
+              <h4>
+                {pickModal.release_date
+                  ? "개봉일 : " + pickModal.release_date
+                  : "첫 공개일 : " + pickModal.first_air_date}
+              </h4>
+              <h4>{"러닝타임 : " + timeConvert(movieDetail.data?.runtime)}</h4>
+            </div>
+            <h1>{"평점 : " + pickModal.vote_average}</h1>
+          </Info>
+          <Tagline>{movieDetail.data?.tagline}</Tagline>
+          <Overview>
+            {pickModal.overview ? `${pickModal.overview}` : "줄거리 없음"}
+          </Overview>
+        </ModalInside>
+      ) : (
+        <ModalInside
+          layoutId={
+            pickModal.title
+              ? `${pickModal.id}_${movieModal.category}`
+              : `${pickModal.id}_${tvModal.category}`
+          }
+          style={{ top: scrollY + 100 }}
+        >
+          <BgPoster
+            fullbgimage={makeImagePath(pickModal.backdrop_path || "w500")}
+          />
+          <ModalTitle>
+            {pickModal.title ? pickModal.title : pickModal.name}
+          </ModalTitle>
+          <Info>
+            <div>
+              <h4>
+                {pickModal.release_date
+                  ? "개봉일 : " + pickModal.release_date
+                  : "첫 공개일 : " + pickModal.first_air_date}
+              </h4>
+              <h4>{"러닝타임 : " + timeConvert(movieDetail.data?.runtime)}</h4>
+            </div>
+            <h1>{"평점 : " + pickModal.vote_average}</h1>
+          </Info>
+          <Tagline>{movieDetail.data?.tagline}</Tagline>
+          <Overview>
+            {pickModal.overview ? `${pickModal.overview}` : "줄거리 없음"}
+          </Overview>
+        </ModalInside>
+      )}
     </ModalFather>
   );
 }

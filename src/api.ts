@@ -9,7 +9,7 @@ export interface IDetail {
 }
 
 export interface IMovie {
-  backdrop_path: string;
+  backdrop_path: string | null;
   overview: string;
   id: number;
   poster_path: string;
@@ -29,6 +29,9 @@ export interface IMovie {
   }[];
   runtime?: number;
   tagline?: string;
+
+  // movie search
+  adult?: Boolean;
 }
 
 export interface IGetMoviesResults {
@@ -57,5 +60,17 @@ export function getTv(category: string) {
 export function getMovieDetail(movieId: number) {
   return fetch(
     `${BASE_PATH}/movie/${movieId}?language=ko-KR&api_key=${API_KEY}`
+  ).then((response) => response.json());
+}
+
+export function getMovieSearch(keyword: string | null) {
+  return fetch(
+    `${BASE_PATH}/search/movie?language=ko-KR&api_key=${API_KEY}&query=${keyword}&include_adult=true`
+  ).then((response) => response.json());
+}
+
+export function getTvSearch(keyword: string | null) {
+  return fetch(
+    `${BASE_PATH}/search/tv?language=ko-KR&api_key=${API_KEY}&query=${keyword}&include_adult=true`
   ).then((response) => response.json());
 }

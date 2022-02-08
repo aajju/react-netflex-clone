@@ -6,16 +6,9 @@ import Tv from "./Routes/Tv";
 import Search from "./Routes/Search";
 import Header from "./Components/Header";
 
-// Router>
-// Routes>
-// Route path="/" element={Home />} />
-// Routes>
-// Router>
-// );
-
 function App() {
   return (
-    <Router>
+    <Router basename={process.env.PUBLIC_URL}>
       <Header />
       <Routes>
         <Route path="/tv" element={<Tv />}>

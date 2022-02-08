@@ -4,12 +4,7 @@ import { getMovies, IGetMoviesResults, IMovie } from "../api";
 import makeImagePath from "../utils";
 import Slider from "../Components/Slider";
 // import { useMatch } from "react-router-dom";
-import {
-  motion,
-  AnimatePresence,
-  AnimateSharedLayout,
-  useViewportScroll,
-} from "framer-motion";
+import { motion, AnimatePresence, useViewportScroll } from "framer-motion";
 import { useRecoilValue } from "recoil";
 import { movieModalAtom } from "../atom";
 import AllModal from "../Components/Modal";
